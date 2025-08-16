@@ -1,0 +1,102 @@
+Вот пример аккуратного `README.md` под твой playbook:
+
+---
+
+# Playbook: Install and Configure Vector
+
+## Описание
+
+Данный playbook автоматизирует установку и настройку [Vector](https://vector.dev/) на целевых хостах (группа `vector` из inventory).
+
+При выполнении playbook делает следующее:
+
+1. Создаёт необходимые директории:
+
+   * `/opt/vector` — директория для установки;
+   * `/etc/vector` — директория для конфигурации;
+   * `/var/lib/vector` — рабочая директория для данных.
+
+2. Скачивает архив с дистрибутивом Vector версии `0.39.0` с GitHub.
+
+3. Распаковывает дистрибутив в `/opt/vector`.
+
+4. Создаёт символьную ссылку на бинарник в `/usr/local/bin/vector`.
+
+5. Разворачивает конфигурацию из шаблона (`templates/vector.toml.j2`) в `/etc/vector/vector.toml`.
+
+6. Создаёт systemd unit-файл `/etc/systemd/system/vector.service`.
+
+7. Перезагружает systemd-демон.
+
+8. Включает и запускает сервис `vector`.
+
+При изменении конфигурации или systemd-юнита вызывается handler, который перезапускает сервис `vector`.
+
+---
+
+## Параметры
+
+В playbook переменные не вынесены, используются зашитые значения:
+
+* **Версия Vector**: `0.39.0`
+* **Пути**:
+
+  * `/opt/vector` — установка;
+  * `/etc/vector/vector.toml` — конфигурация;
+  * `/usr/local/bin/vector` — бинарник;
+  * `/var/lib/vector` — рабочая директория.
+
+Шаблон конфигурации находится в `templates/vector.toml.j2`.
+
+---
+
+## Теги
+
+Каждая группа задач размечена тегами:
+
+* `setup` — подготовка директорий
+* `download` — скачивание дистрибутива
+* `install` — распаковка архива и установка бинарника
+* `config` — развёртывание конфигурации и systemd unit
+* `service` — перезагрузка systemd и запуск сервиса
+
+### Примеры запуска по тегам
+
+Запустить только установку:
+
+```bash
+ansible-playbook -i inventory/prod.yml vector.yml --tags install
+```
+
+Применить изменения только конфигурации:
+
+```bash
+ansible-playbook -i inventory/prod.yml vector.yml --tags config
+```
+
+Запустить сервисные операции:
+
+```bash
+ansible-playbook -i inventory/prod.yml vector.yml --tags service
+```
+
+---
+
+## Использование
+
+1. Добавьте хосты в `inventory/prod.yml`, например:
+
+```yaml
+vector:
+  hosts:
+    vector-01:
+      ansible_connection: local
+```
+
+2. Запустите playbook:
+
+```bash
+ansible-playbook -i inventory/prod.yml vector.yml
+```
+
+После выполнения Vector будет установлен и запущен как systemd-сервис.

@@ -1,0 +1,89 @@
+---
+- name: Install and configure Vector
+  hosts: vector
+  become: true
+  handlers:
+    - name: restart vector
+      ansible.builtin.service:
+        name: vector
+        state: restarted
+      listen: restart vector
+
+  tasks:
+    - name: Create directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+      loop:
+        - /opt/vector
+        - /etc/vector
+        - /var/lib/vector
+
+    - name: Download Vector tarball
+      ansible.builtin.get_url:
+        url: "https://github.com/vectordotdev/vector/releases/download/v0.39.0/vector-0.39.0-x86_64-unknown-linux-gnu.tar.gz"
+        dest: "/tmp/vector-0.39.0-x86_64-unknown-linux-gnu.tar.gz"
+        mode: '0644'
+        force: true
+
+    - name: Unarchive Vector into /opt/vector
+      ansible.builtin.unarchive:
+        src: "/tmp/vector-0.39.0-x86_64-unknown-linux-gnu.tar.gz"
+        dest: "/opt/vector"
+        remote_src: true
+        creates: "/opt/vector/vector-0.39.0/bin/vector"
+
+    - name: Install vector binary
+      ansible.builtin.file:
+        src: "/opt/vector/vector-0.39.0/bin/vector"
+        dest: "/usr/local/bin/vector"
+        state: link
+        force: true
+        mode: '0755'
+
+    - name: Deploy Vector config (template, единственный шаблонный файл)
+      ansible.builtin.template:
+        src: "templates/vector.toml.j2"
+        dest: "/etc/vector/vector.toml"
+        owner: root
+        group: root
+        mode: '0644'
+      notify: restart vector
+
+    - name: Deploy systemd unit (статический через copy)
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/vector.service
+        owner: root
+        group: root
+        mode: '0644'
+        content: |
+          [Unit]
+          Description=Vector - High-Performance Observability Data Router
+          After=network-online.target
+          Wants=network-online.target
+
+          [Service]
+          ExecStart=/usr/local/bin/vector --config /etc/vector/vector.toml
+          Restart=on-failure
+          RestartSec=5
+          WorkingDirectory=/var/lib/vector
+          User=root
+          Group=root
+          LimitNOFILE=65536
+
+          [Install]
+          WantedBy=multi-user.target
+      notify: restart vector
+
+    - name: Reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+    - name: Enable and start Vector
+      ansible.builtin.service:
+        name: vector
+        state: started
+        enabled: true
