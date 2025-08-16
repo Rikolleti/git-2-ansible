@@ -1,0 +1,3 @@
+---
+fedora_pkg_manager: dnf
+some_fact: "fedora fact"
