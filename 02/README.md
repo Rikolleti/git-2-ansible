@@ -1,7 +1,3 @@
-Вот пример аккуратного `README.md` под твой playbook:
-
----
-
 # Playbook: Install and Configure Vector
 
 ## Описание
@@ -100,3 +96,10 @@ ansible-playbook -i inventory/prod.yml vector.yml
 ```
 
 После выполнения Vector будет установлен и запущен как systemd-сервис.
+
+Скриншоты:
+<img width="1504" height="752" alt="Снимок экрана 2025-08-16 в 12 14 34" src="https://github.com/user-attachments/assets/8855e31f-c455-4c8b-8406-9f689dde5976" />
+
+<img width="1504" height="783" alt="Снимок экрана 2025-08-16 в 12 14 52" src="https://github.com/user-attachments/assets/e2bb353f-ee3d-44c3-bee9-fa3222c54d95" />
+
+<img width="1504" height="309" alt="Снимок экрана 2025-08-16 в 12 15 01" src="https://github.com/user-attachments/assets/eb2a3f04-ea03-412a-bcc2-18c220169f06" />
