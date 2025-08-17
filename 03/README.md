@@ -1,17 +1,13 @@
-# Ansible Playbook --- Установка Lighthouse
+# Ansible Playbook - Установка Lighthouse
 
 ## Описание
 
 Плейбук устанавливает и настраивает веб-интерфейс **Lighthouse** за **Nginx** на хостах группы `lighthouse`.
 
 Что делает:
-
 - Устанавливает `nginx` (Debian/Ubuntu).
-
 - Клонирует репозиторий **Lighthouse** в целевой каталог.
-
 - Разворачивает конфигурацию `nginx` из шаблона `templates/nginx.conf.j2`.
-
 - Включает автозапуск и запускает сервис `nginx`.
 
 ---
@@ -19,11 +15,8 @@
 ## Требования
 
 - Доступ Ansible к хостам с привилегиями `become: true`.
-
 - Интернет-доступ с целевых хостов (для `git clone`).
-
 - Целевые ОС: Debian/Ubuntu (используется модуль `apt`).
-
 - Определены переменные (см. ниже), при необходимости --- в зашифрованном vault-файле.
 
 ---
@@ -53,7 +46,6 @@
 ------
 
 Обычный запуск (переменные под Vault):
-
 `ansible-playbook -i inventory/hosts.yml prod.yml --ask-vault-pass`
 
 Пробный прогон без изменений (dry run):
@@ -71,20 +63,16 @@
 Примеры запуска с тегами:
 
 # Выполнить только установку nginx
-
 `ansible-playbook -i inventory/hosts.yml prod.yml --tags nginx`
 
 # Выполнить только клонирование Lighthouse
-
 `ansible-playbook -i inventory/hosts.yml prod.yml --tags lighthouse`
 
 # Выполнить только выкладку конфига
-
 `ansible-playbook -i inventory/hosts.yml prod.yml --tags config`
 
 Проверка
 --------
-
 Проверить активность сервиса:
 `systemctl is-active nginx`
 
