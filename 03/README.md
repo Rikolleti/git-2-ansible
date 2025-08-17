@@ -23,6 +23,7 @@
 
 ## Структура
 
+```
 ├─ inventory/
 │ └─ hosts.yml
 ├─ group_vars/
@@ -30,6 +31,7 @@
 ├─ templates/ 
 │ └─ nginx.conf.j2 
 └─ prod.yml # сам playbook
+```
 
 ## Задачи плейбука (prod.yml)
 
