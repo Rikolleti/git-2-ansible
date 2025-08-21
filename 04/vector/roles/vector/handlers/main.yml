@@ -1,0 +1,7 @@
+---
+# handlers file for vector-role
+- name: restart vector
+  ansible.builtin.service:
+    name: vector
+    state: restarted
+  listen: restart vector

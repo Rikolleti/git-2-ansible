@@ -1,0 +1,31 @@
+---
+# tasks file for lighthouse-role
+- name: Install nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+    update_cache: true
+  tags: [nginx]
+
+- name: Download Lighthouse
+  ansible.builtin.git:
+    repo: "{{ lighthouse_repo }}"
+    dest: "{{ lighthouse_dir }}"
+    version: master
+  tags: [lighthouse]
+
+- name: Deploy nginx template
+  ansible.builtin.template:
+    # Внутри роли НЕ указываем папку templates/
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    mode: '0644'
+  notify: restart nginx
+  tags: [config]
+
+- name: Ensure nginx is enabled and started
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true
+  tags: [service]

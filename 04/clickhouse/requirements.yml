@@ -1,0 +1,4 @@
+---
+- name: clickhouse
+  src: git@github.com:Rikolleti/clickhouse-role-homework.git
+  scm: git

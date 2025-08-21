@@ -1,0 +1,49 @@
+---
+# tasks file for clickhouse-role
+- block:
+  - name: Ensure deps for apt are present
+    ansible.builtin.apt:
+      name:
+        - ca-certificates
+        - apt-transport-https
+        - curl
+        - gnupg
+      state: present
+      update_cache: true
+
+  - name: Download ClickHouse repo key (repomd.xml.key)
+    ansible.builtin.get_url:
+      url: https://packages.clickhouse.com/rpm/lts/repodata/repomd.xml.key
+      dest: /tmp/clickhouse-repomd.xml.key
+      mode: '0644'
+
+  - name: Convert key to keyring (gpg --dearmor)
+    ansible.builtin.command:
+      cmd: gpg --dearmor -o /usr/share/keyrings/clickhouse-keyring.gpg /tmp/clickhouse-repomd.xml.key
+    args:
+      creates: /usr/share/keyrings/clickhouse-keyring.gpg
+
+  - name: Add ClickHouse apt repository (stable)
+    ansible.builtin.apt_repository:
+      repo: 'deb [signed-by=/usr/share/keyrings/clickhouse-keyring.gpg] https://packages.clickhouse.com/deb stable main'
+      state: present
+      filename: clickhouse
+
+  - name: Install clickhouse packages
+    ansible.builtin.apt:
+      name:
+        - clickhouse-server
+        - clickhouse-client
+      state: present
+      update_cache: true
+    notify: Start clickhouse service
+
+  - name: Flush handlers (ensure server is up before creating DB)
+    ansible.builtin.meta: flush_handlers
+
+  - name: Create database 'logs' (idempotent)
+    ansible.builtin.command:
+      cmd: "clickhouse-client -q 'CREATE DATABASE IF NOT EXISTS logs;'"
+    register: create_db
+    changed_when: "'created' in (create_db.stdout | default(''))"
+    failed_when: create_db.rc != 0

@@ -1,0 +1,7 @@
+---
+- name: Install Lighthouse
+  hosts: lighthouse
+  become: true
+  gather_facts: true
+  roles:
+    - lighthouse
