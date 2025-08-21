@@ -1,46 +1,71 @@
 # Домашнее задание к занятию 4 «Работа с roles»
 
-## Подготовка к выполнению
+## Выполненное задание
 
-1. * Необязательно. Познакомьтесь с [LightHouse](https://youtu.be/ymlrNlaHzIY?t=929).
-2. Создайте два пустых публичных репозитория в любом своём проекте: vector-role и lighthouse-role.
-3. Добавьте публичную часть своего ключа к своему профилю на GitHub.
+В рамках задания были созданы три роли и три плейбука для развертывания следующих сервисов:
 
-## Основная часть
-
-Ваша цель — разбить ваш playbook на отдельные roles. 
-
-Задача — сделать roles для ClickHouse, Vector и LightHouse и написать playbook для использования этих ролей. 
-
-Ожидаемый результат — существуют три ваших репозитория: два с roles и один с playbook.
-
-**Что нужно сделать**
-
-1. Создайте в старой версии playbook файл `requirements.yml` и заполните его содержимым:
-
-   ```yaml
-   ---
-     - src: git@github.com:AlexeySetevoi/ansible-clickhouse.git
-       scm: git
-       version: "1.13"
-       name: clickhouse 
-   ```
-
-2. При помощи `ansible-galaxy` скачайте себе эту роль.
-3. Создайте новый каталог с ролью при помощи `ansible-galaxy role init vector-role`.
-4. На основе tasks из старого playbook заполните новую role. Разнесите переменные между `vars` и `default`. 
-5. Перенести нужные шаблоны конфигов в `templates`.
-6. Опишите в `README.md` обе роли и их параметры. Пример качественной документации ansible role [по ссылке](https://github.com/cloudalchemy/ansible-prometheus).
-7. Повторите шаги 3–6 для LightHouse. Помните, что одна роль должна настраивать один продукт.
-8. Выложите все roles в репозитории. Проставьте теги, используя семантическую нумерацию. Добавьте roles в `requirements.yml` в playbook.
-9. Переработайте playbook на использование roles. Не забудьте про зависимости LightHouse и возможности совмещения `roles` с `tasks`.
-10. Выложите playbook в репозиторий.
-11. В ответе дайте ссылки на оба репозитория с roles и одну ссылку на репозиторий с playbook.
+- **ClickHouse** (роль: `clickhouse-role`)
+- **Vector** (роль: `vector-role`)
+- **LightHouse** (роль: `lighthouse-role`)
 
 ---
 
-### Как оформить решение задания
+## Структура решения
 
-Выполненное домашнее задание пришлите в виде ссылки на .md-файл в вашем репозитории.
+### Роли
+
+1. **clickhouse-role**
+   - Устанавливает и настраивает СУБД ClickHouse.
+   - Переменные:
+     - `clickhouse_version` — версия ClickHouse.
+     - `clickhouse_packages` — список пакетов для установки.
+   - Используются шаблоны для конфигурации.
+   - Репозиторий: [clickhouse-role](https://github.com/Rikolleti/clickhouse-role-homework)
+
+2. **vector-role**
+   - Устанавливает агент сбора логов Vector.
+   - Конфигурация перенесена в шаблоны (`templates/vector.yaml.j2`).
+   - Репозиторий: [vector-role](https://github.com/Rikolleti/vector-role-homework)
+
+3. **lighthouse-role**
+   - Устанавливает и настраивает веб-интерфейс LightHouse.
+   - Переменные:
+     - `lighthouse_repo` — git-репозиторий LightHouse.
+     - `lighthouse_dir` — директория для установки.
+   - Используются шаблоны для Nginx-конфига.
+   - Репозиторий: [lighthouse-role](https://github.com/Rikolleti/lighthouse-role-homework)
 
 ---
+
+### Playbook-и
+
+1. **clickhouse-playbook**
+   - Разворачивает ClickHouse с использованием роли `clickhouse-role`.
+
+2. **vector-playbook**
+   - Разворачивает Vector с использованием роли `vector-role`.
+
+3. **lighthouse-playbook**
+   - Разворачивает LightHouse с использованием роли `lighthouse-role`.
+   - Использует зависимость от ClickHouse (подключается к уже установленной БД).
+
+Все плейбуки используют `requirements.yml` для загрузки ролей.
+
+---
+
+## requirements.yml
+
+```yaml
+---
+- name: clickhouse
+  src: git@github.com:Rikolleti/clickhouse-role-homework.git
+  scm: git
+
+- name: lighthouse
+  src: git@github.com:Rikolleti/lighthouse-role-homework.git
+  scm: git
+
+- name: vector
+  src: git@github.com:Rikolleti/vector-role-homework.git
+  scm: git
+  
