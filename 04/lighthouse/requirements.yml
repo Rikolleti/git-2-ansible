@@ -1,4 +1,0 @@
----
-- name: lighthouse
-  src: git@github.com:Rikolleti/lighthouse-role-homework.git
-  scm: git

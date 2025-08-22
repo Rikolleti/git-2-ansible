@@ -1,4 +1,0 @@
----
-- name: vector
-  src: git@github.com:Rikolleti/vector-role-homework.git
-  scm: git
