@@ -1,0 +1,107 @@
+---
+# tasks file for vector-role
+
+- block:
+    - name: Create directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+      loop:
+        - /opt/vector
+        - /etc/vector
+        - /var/lib/vector
+
+    - name: Download Vector tarball
+      ansible.builtin.get_url:
+        url: "https://github.com/vectordotdev/vector/releases/download/v0.39.0/vector-0.39.0-x86_64-unknown-linux-gnu.tar.gz"
+        dest: "/tmp/vector-0.39.0-x86_64-unknown-linux-gnu.tar.gz"
+        mode: '0644'
+        force: true
+
+    - name: Unarchive Vector into /opt/vector
+      ansible.builtin.unarchive:
+        src: "/tmp/vector-0.39.0-x86_64-unknown-linux-gnu.tar.gz"
+        dest: "/opt/vector"
+        remote_src: true
+        # ускоряет идемпотентность — не распаковывать повторно, если бинарь уже установлен
+        creates: "/usr/local/bin/vector"
+
+    - name: Locate unpacked Vector binary
+      ansible.builtin.find:
+        paths: /opt/vector
+        patterns: vector
+        file_type: file
+        recurse: true
+      register: vector_bins
+
+    - name: Ensure vector binary was found
+      ansible.builtin.assert:
+        that:
+          - vector_bins.matched | int > 0
+        fail_msg: "Vector binary not found under /opt/vector after unarchive"
+
+    - name: Install vector binary
+      ansible.builtin.copy:
+        src: "{{ (vector_bins.files | map(attribute='path') | list | first) }}"
+        dest: /usr/local/bin/vector
+        mode: '0755'
+        remote_src: true
+
+    - name: Deploy Vector config (template)
+      ansible.builtin.template:
+        src: "vector.toml.j2"
+        dest: "/etc/vector/vector.toml"
+        owner: root
+        group: root
+        mode: '0644'
+      notify: restart vector
+
+    # ----- systemd-таски выполняются только там, где есть systemd -----
+
+# Deploy systemd unit
+    - name: Deploy systemd unit
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/vector.service
+        owner: root
+        group: root
+        mode: '0644'
+        content: |
+          [Unit]
+          Description=Vector - High-Performance Observability Data Router
+          After=network-online.target
+          Wants=network-online.target
+
+          [Service]
+          ExecStart=/usr/local/bin/vector --config /etc/vector/vector.toml
+          Restart=on-failure
+          RestartSec=5
+          WorkingDirectory=/var/lib/vector
+          User=root
+          Group=root
+          LimitNOFILE=65536
+
+          [Install]
+          WantedBy=multi-user.target
+      when:
+        - ansible_service_mgr == 'systemd'
+        - ansible_facts['virtualization_type'] != 'docker'
+      notify: restart vector
+
+    - name: Reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: true
+      when:
+        - ansible_service_mgr == 'systemd'
+        - ansible_facts['virtualization_type'] != 'docker'
+
+    - name: Enable and start Vector
+      ansible.builtin.service:
+        name: vector
+        state: started
+        enabled: true
+      when:
+        - ansible_service_mgr == 'systemd'
+        - ansible_facts['virtualization_type'] != 'docker'

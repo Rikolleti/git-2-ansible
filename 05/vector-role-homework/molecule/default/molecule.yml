@@ -1,0 +1,26 @@
+---
+driver:
+  name: docker
+
+lint: |
+  ansible-lint .
+  yamllint .
+
+platforms:
+  - name: oraclelinux-8
+    image: docker.io/aptplatforms/oraclelinux-python
+    pre_build_image: true
+  - name: ubuntu-2204
+    image: geerlingguy/docker-ubuntu2204-ansible:latest
+    pre_build_image: true
+
+provisioner:
+  name: ansible
+  playbooks:
+    prepare: prepare.yml
+  config_options:
+    defaults:
+      interpreter_python: auto_silent
+
+verifier:
+  name: ansible

@@ -1,0 +1,30 @@
+---
+- name: Verify vector-role
+  hosts: all
+  gather_facts: false
+  vars:
+    vector_bin_path: "{{ hostvars[inventory_hostname].vector_bin_path | default('/usr/local/bin/vector') }}"
+    vector_config_path: "{{ hostvars[inventory_hostname].vector_config_path | default('/etc/vector/vector.toml') }}"
+  tasks:
+    - name: Check vector binary
+      ansible.builtin.stat:
+        path: /usr/local/bin/vector
+      register: vector_bin
+
+    - name: Assert vector binary exists
+      ansible.builtin.assert:
+        that:
+          - vector_bin.stat.exists
+          - vector_bin.stat.executable | default(false)
+        fail_msg: "/usr/local/bin/vector is missing or not executable"
+
+    - name: Check config file exists
+      ansible.builtin.stat:
+        path: /etc/vector/vector.toml
+      register: vector_cfg
+
+    - name: Assert config file present
+      ansible.builtin.assert:
+        that:
+          - vector_cfg.stat.exists
+        fail_msg: "/etc/vector/vector.toml is missing"

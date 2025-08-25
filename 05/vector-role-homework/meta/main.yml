@@ -1,0 +1,20 @@
+---
+galaxy_info:
+  namespace: rikolleti
+  role_name: vector
+  author: Azhdar
+  description: Install and configure Vector (data pipeline tool)
+  company: none
+
+  license: MIT
+
+  min_ansible_version: "2.10"
+
+  platforms:
+    - name: EL
+      versions:
+        - "8"
+    - name: Ubuntu
+      versions:
+        - "20.04"
+        - "22.04"

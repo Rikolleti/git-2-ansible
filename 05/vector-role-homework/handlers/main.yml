@@ -1,0 +1,16 @@
+---
+- name: restart vector (systemd)
+  listen: restart vector
+  ansible.builtin.service:
+    name: vector
+    state: restarted
+  when:
+    - ansible_service_mgr == 'systemd'
+    - ansible_facts['virtualization_type'] != 'docker'
+
+- name: restart vector (noop in containers / non-systemd)
+  listen: restart vector
+  ansible.builtin.debug:
+    msg: "Skip restart: non-systemd environment (Docker or similar)."
+  when:
+    - ansible_service_mgr != 'systemd' or ansible_facts['virtualization_type'] == 'docker'
