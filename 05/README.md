@@ -16,6 +16,9 @@
    molecule test -s ubuntu_xenial
 ```
 
+<img width="920" height="60" alt="Снимок экрана 2025-08-25 в 17 42 21" src="https://github.com/user-attachments/assets/db951cfd-1f4d-4f56-bcc6-cd03844c602f" />
+
+
 2. В каталоге vector-role создан тестовый сценарий:
 ```
 molecule init scenario --driver-name docker
