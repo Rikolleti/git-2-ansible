@@ -1,0 +1,8 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  collections:
+    - my_own_namespace.yandex_cloud_el
+  roles:
+    - role: file_create

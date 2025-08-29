@@ -1,0 +1,7 @@
+---
+galaxy_info:
+  author: Azhdar Mamedov
+  description: "Single-task role running my_own_module"
+  license: MIT
+  min_ansible_version: "2.13"
+dependencies: []

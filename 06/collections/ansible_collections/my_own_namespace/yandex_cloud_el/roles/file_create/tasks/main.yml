@@ -1,0 +1,5 @@
+---
+- name: Create file via custom module
+  my_own_namespace.yandex_cloud_el.my_own_module:
+    path: "{{ file_create_path }}"
+    content: "{{ file_create_content }}"
